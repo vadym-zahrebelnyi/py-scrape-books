@@ -1,0 +1,62 @@
+# Define your item pipelines here
+#
+# Don't forget to add your pipeline to the ITEM_PIPELINES setting
+# See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
+
+
+# useful for handling different item types with a single interface
+import re
+
+from itemadapter import ItemAdapter
+from scrapy.exceptions import DropItem
+
+
+class ScrapeBooksPipeline:
+
+    RATING_MAP = {
+        "One": 1,
+        "Two": 2,
+        "Three": 3,
+        "Four": 4,
+        "Five": 5,
+    }
+
+    def process_item(self, item, spider):
+        adapter = ItemAdapter(item)
+
+        if raw_price := adapter.get("price"):
+            if cleaned_price := (
+                raw_price.replace("£", "")
+                .replace(",", "")
+                .strip()
+            ):
+                try:
+                    adapter["price"] = float(cleaned_price)
+                except ValueError:
+                    adapter["price"] = None
+            else:
+                adapter["price"] = None
+        else:
+            adapter["price"] = None
+
+        if raw_amount := adapter.get("amount_in_stock"):
+            if match := re.search(r"\d+", str(raw_amount)):
+                try:
+                    adapter["amount_in_stock"] = int(match.group())
+                except ValueError:
+                    adapter["amount_in_stock"] = None
+            else:
+                adapter["amount_in_stock"] = None
+        else:
+            adapter["amount_in_stock"] = None
+
+        raw_rating = adapter.get("rating")
+        adapter["rating"] = self.RATING_MAP.get(raw_rating)
+
+        if description := adapter.get("description"):
+            adapter["description"] = description.strip()
+
+        if not adapter.get("upc"):
+            raise DropItem("Missing UPC")
+
+        return item
