@@ -3,7 +3,7 @@
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-from typing import AsyncIterable, AsyncGenerator, Any, Iterable, Generator
+from typing import Any, Iterable, Generator
 
 from scrapy import signals, Request, Spider
 from scrapy.crawler import Crawler
@@ -14,11 +14,11 @@ class ScrapeBooksSpiderMiddleware:
 
     @classmethod
     def from_crawler(cls, crawler: Crawler) -> "ScrapeBooksSpiderMiddleware":
-        spider = cls()
+        instance = cls()
         crawler.signals.connect(
-            spider.spider_opened, signal=signals.spider_opened
+            instance.spider_opened, signal=signals.spider_opened
         )
-        return spider
+        return instance
 
     def process_spider_input(
             self,
@@ -52,11 +52,11 @@ class ScrapeBooksDownloaderMiddleware:
 
     @classmethod
     def from_crawler(cls, crawler: Crawler) -> "ScrapeBooksDownloaderMiddleware":
-        spider = cls()
+        instance = cls()
         crawler.signals.connect(
-            spider.spider_opened, signal=signals.spider_opened
+            instance.spider_opened, signal=signals.spider_opened
         )
-        return spider
+        return instance
 
     def process_request(
             self,

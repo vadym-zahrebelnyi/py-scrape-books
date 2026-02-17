@@ -29,8 +29,10 @@ class BooksSpider(scrapy.Spider):
 
         item["title"] = response.css("div.product_main h1::text").get()
         item["price"] = response.css("p.price_color::text").get()
+        # Extract the number of books in stock, conversion to int happens in pipeline
         item["amount_in_stock"] = response.css("p.availability::text").re_first(r"\d+")
         rating_class = response.css("p.star-rating::attr(class)").get()
+        # Extract the rating text (e.g., "Three"), conversion to int happens in pipeline
         item["rating"] = rating_class.split()[-1] if rating_class else None
         item["category"] = response.css(
             "ul.breadcrumb li:nth-child(3) a::text"
