@@ -18,7 +18,8 @@ class BooksSpider(scrapy.Spider):
                 callback=self.parse_book_details,
             )
 
-        if next_page := response.css("li.next a::attr(href)").get():
+        next_page = response.css("li.next a::attr(href)").get()
+        if next_page:
             yield response.follow(next_page, callback=self.parse)
 
     def parse_book_details(self, response):
@@ -29,9 +30,8 @@ class BooksSpider(scrapy.Spider):
         item["title"] = response.css("div.product_main h1::text").get()
         item["price"] = response.css("p.price_color::text").get()
         item["amount_in_stock"] = response.css("p.availability::text").re_first(r"\d+")
-        item["rating"] = rating_class.split()[-1] if (
-            rating_class := response.css("p.star-rating::attr(class)").get()
-        ) else None
+        rating_class = response.css("p.star-rating::attr(class)").get()
+        item["rating"] = rating_class.split()[-1] if rating_class else None
         item["category"] = response.css(
             "ul.breadcrumb li:nth-child(3) a::text"
         ).get()

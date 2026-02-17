@@ -44,12 +44,6 @@ class ScrapeBooksSpiderMiddleware:
     ) -> None:
         pass
 
-    async def process_start(
-            self, start: AsyncIterable
-    ) -> AsyncGenerator[Any, Any]:
-        async for item_or_request in start:
-            yield item_or_request
-
     def spider_opened(self, spider: Spider) -> None:
         spider.logger.info("Spider opened: %s" % spider.name)
 
@@ -57,7 +51,7 @@ class ScrapeBooksSpiderMiddleware:
 class ScrapeBooksDownloaderMiddleware:
 
     @classmethod
-    def from_crawler(cls, crawler: Crawler) -> None:
+    def from_crawler(cls, crawler: Crawler) -> "ScrapeBooksDownloaderMiddleware":
         spider = cls()
         crawler.signals.connect(
             spider.spider_opened, signal=signals.spider_opened

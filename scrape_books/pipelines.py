@@ -24,12 +24,14 @@ class ScrapeBooksPipeline:
     def process_item(self, item, spider):
         adapter = ItemAdapter(item)
 
-        if raw_price := adapter.get("price"):
-            if cleaned_price := (
+        raw_price = adapter.get("price")
+        if raw_price:
+            cleaned_price = (
                 raw_price.replace("£", "")
                 .replace(",", "")
                 .strip()
-            ):
+            )
+            if cleaned_price:
                 try:
                     adapter["price"] = float(cleaned_price)
                 except ValueError:
@@ -39,8 +41,10 @@ class ScrapeBooksPipeline:
         else:
             adapter["price"] = None
 
-        if raw_amount := adapter.get("amount_in_stock"):
-            if match := re.search(r"\d+", str(raw_amount)):
+        raw_amount = adapter.get("amount_in_stock")
+        if raw_amount:
+            match = re.search(r"\d+", str(raw_amount))
+            if match:
                 try:
                     adapter["amount_in_stock"] = int(match.group())
                 except ValueError:
@@ -53,7 +57,8 @@ class ScrapeBooksPipeline:
         raw_rating = adapter.get("rating")
         adapter["rating"] = self.RATING_MAP.get(raw_rating)
 
-        if description := adapter.get("description"):
+        description = adapter.get("description")
+        if description:
             adapter["description"] = description.strip()
 
         if not adapter.get("upc"):
